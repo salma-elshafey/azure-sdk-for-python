@@ -66,21 +66,27 @@ C. Assess Task Completion:
 - **Incomplete**: No usable deliverable or major requirements unmet
 
 D. Assign a Score:
-   - **TRUE**: The agent delivered a complete and correct solution that accomplishes the user's entire goal. The user does not need to take further action or ask follow-up questions to get what they originally asked for.
-   - **FALSE**: The agent failed to complete one or more parts of the task, provided an incorrect/incomplete result, or left the user's goal unresolved.
+   - **1**: The agent delivered a complete and correct solution that accomplishes the user's entire goal. The user does not need to take further action or ask follow-up questions to get what they originally asked for.
+   - **0**: The agent failed to complete one or more parts of the task, provided an incorrect/incomplete result, or left the user's goal unresolved.
 
 OUTPUT FORMAT
 =============
 Output a JSON object with these keys:
 {
-  "explanation": "<15-60 words explaining the completion status>",
-  "details": {
+  "reasoning": "<15-60 words explaining the completion status>",
+  "properties": {
     "task_requirements": "<15-60 words on what the user specifically requested>",
     "delivered_outcome": "<15-60 words on what the agent actually provided>",
     "completion_gaps": "<15-60 words on missing elements if task is incomplete>"
   },
-  "success": <TRUE or FALSE>
+  "score": <1 or 0>,
+  "status": "<completed or skipped>"
 }
+
+- **reasoning**: A brief explanation of the completion status.
+- **properties**: An object containing evaluation details. null when status is "skipped".
+- **score**: 1 if the task was fully completed, 0 otherwise. null when status is "skipped".
+- **status**: "completed" when you were able to evaluate the input. "skipped" when the input is not applicable or cannot be evaluated (e.g., no response provided, empty input).
 
 SCORING EXAMPLES
 ================
@@ -113,13 +119,14 @@ Transportation: Metro Day Pass recommended. Book Louvre tickets online in advanc
 
 EXPECTED OUTPUT:
 {
-  "explanation": "Complete 3-day Paris itinerary delivered with cultural landmarks and local cuisine for each day, including practical transportation advice.",
-  "details": {
+  "reasoning": "Complete 3-day Paris itinerary delivered with cultural landmarks and local cuisine for each day, including practical transportation advice.",
+  "properties": {
     "task_requirements": "3-day Paris itinerary with cultural landmarks and local cuisine",
     "delivered_outcome": "Detailed 3-day schedule with specific landmarks, restaurants, and practical tips",
     "completion_gaps": "None"
   },
-  "success": TRUE
+  "score": 1,
+  "status": "completed"
 }
 
 ### SUCCESS: TRUE - Example B
@@ -138,13 +145,14 @@ Your internet issues are resolved - update firmware and change DNS as instructed
 
 EXPECTED OUTPUT:
 {
-  "explanation": "Both issues resolved: specific troubleshooting steps provided for internet drops, and unlimited data plan successfully activated.",
-  "details": {
+  "reasoning": "Both issues resolved: specific troubleshooting steps provided for internet drops, and unlimited data plan successfully activated.",
+  "properties": {
     "task_requirements": "Fix internet connection issues and upgrade to unlimited data plan",
     "delivered_outcome": "Diagnostic completed with specific fix instructions, data plan upgrade confirmed active",
     "completion_gaps": "None"
   },
-  "success": TRUE
+  "score": 1,
+  "status": "completed"
 }
 
 ### SUCCESS: FALSE - Example A
@@ -157,13 +165,14 @@ I'd recommend visiting the Louvre and Eiffel Tower. Paris has great food - try F
 
 EXPECTED OUTPUT:
 {
-  "explanation": "Vague suggestions provided but no actual day-by-day itinerary created. Missing specific landmarks, restaurants, and detailed schedule.",
-  "details": {
+  "reasoning": "Vague suggestions provided but no actual day-by-day itinerary created. Missing specific landmarks, restaurants, and detailed schedule.",
+  "properties": {
     "task_requirements": "3-day Paris itinerary with cultural landmarks and local cuisine",
     "delivered_outcome": "General recommendations without structured itinerary",
     "completion_gaps": "No day-by-day schedule, no specific restaurant recommendations, no detailed cultural landmarks"
   },
-  "success": FALSE
+  "score": 0,
+  "status": "completed"
 }
 
 ### SUCCESS: FALSE - Example B
@@ -178,13 +187,14 @@ I found that your router firmware needs updating. You can usually do this throug
 
 EXPECTED OUTPUT:
 {
-  "explanation": "Internet troubleshooting started but not completed with specific steps. Data plan upgrade not attempted. User cannot proceed without more help.",
-  "details": {
+  "reasoning": "Internet troubleshooting started but not completed with specific steps. Data plan upgrade not attempted. User cannot proceed without more help.",
+  "properties": {
     "task_requirements": "Fix internet connection issues and upgrade to unlimited data plan",
     "delivered_outcome": "Identified router firmware issue but no specific fix instructions, data upgrade not completed",
     "completion_gaps": "No specific firmware update steps, data plan upgrade not processed"
   },
-  "success": FALSE
+  "score": 0,
+  "status": "completed"
 }
 
 ### SUCCESS: FALSE - Example C
@@ -197,13 +207,14 @@ I can help you analyze sales data! Sales analysis is important for business grow
 
 EXPECTED OUTPUT:
 {
-  "explanation": "No actual analysis performed and no report generated. Agent provided general information about sales analysis instead of completing the requested task.",
-  "details": {
+  "reasoning": "No actual analysis performed and no report generated. Agent provided general information about sales analysis instead of completing the requested task.",
+  "properties": {
     "task_requirements": "Analyze Q3 sales data and generate summary report",
     "delivered_outcome": "General information about sales analysis concepts",
     "completion_gaps": "No data analysis performed, no summary report created"
   },
-  "success": FALSE
+  "score": 0,
+  "status": "completed"
 }
 
 KEY PRINCIPLES
